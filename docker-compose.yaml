@@ -1,0 +1,63 @@
+version: '3.6'
+services:
+  telegraf:
+    image: telegraf
+    container_name: telegraf
+    restart: always
+    env_file:
+      - variables.env
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    depends_on:
+      - influxdb
+    links:
+      - influxdb
+    ports:
+    - '8125:8125'
+
+  influxdb:
+    image: influxdb:1.8-alpine
+    container_name: influxdb
+    restart: always
+    env_file:
+      - variables.env
+    ports:
+      - '8086:8086'
+      - '8083:8083'
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
+    depends_on:
+      - influxdb
+    env_file:
+      - variables.env
+    links:
+      - influxdb
+    ports:
+      - '80:3000'
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  mqttx-web:
+    image: emqx/mqttx-web
+    container_name: mqttx-web
+    ports:
+      - "81:80"
+
+  webserver:
+    image: webserver
+    container_name: webserver
+    ports:
+      - "8080:80"
+  mqtt5:
+    extends:
+      file: mqtt5/docker-compose.yml
+      service: mqtt5
+
+volumes:
+  grafana_data: {}
+  influxdb_data: {}

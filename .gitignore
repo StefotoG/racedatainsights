@@ -1,0 +1,4 @@
+.envrc
+mqtt5/config/pwfile
+mqtt5/data/mosquitto.db
+variables.env
